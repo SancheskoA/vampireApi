@@ -9,12 +9,10 @@ import java.sql.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.*
 
-
-
 fun Application.configureDatabases() {
     Database.connect(
         "jdbc:postgresql://localhost:5432/inventory",
-        user = "postgres",
-        password = "Barcelona.1899"
+        user = "itmo_user",
+        password = "pass"
     )
 }

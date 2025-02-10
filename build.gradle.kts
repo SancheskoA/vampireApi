@@ -43,4 +43,5 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("io.ktor:ktor-server-request-validation")
+    implementation("com.auth0:java-jwt:4.4.0")
 }

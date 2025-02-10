@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.routes.authRoutes
 import com.example.routes.productRouting
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -26,5 +27,6 @@ fun Application.configureRouting() {
             call.respondText("Hello World!")
         }
         productRouting()
+        authRoutes()
     }
 }

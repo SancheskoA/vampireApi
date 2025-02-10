@@ -50,7 +50,7 @@ fun Route.productRouting() {
                     status = HttpStatusCode.NotFound
                 )
             val newProduct = call.receive<NewProduct>()
-            repository.updateProduct(id.toInt(),newProduct)
+            repository.updateProduct(id.toInt(), newProduct)
             call.respondText("Product updated correctly", status = HttpStatusCode.Created)
 
         }
