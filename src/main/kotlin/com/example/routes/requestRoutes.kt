@@ -16,17 +16,12 @@ fun Route.requestRoutes() {
 
     route("/api/requests") {
         get("/vampire") {
-            val userId = call.request.queryParameters["id"]?: return@get call.respondText(
-                "Missing user id",
-                status = HttpStatusCode.NotFound
-            )
-
-            val requests = repository.allRequestFilter( null, userId.toInt())
+            val requests = repository.allRequestFilter( null, null)
             call.respond(requests)
         }
 
         get("/history") {
-            val userId = call.request.queryParameters["id"]?: return@get call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@get call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
@@ -36,7 +31,7 @@ fun Route.requestRoutes() {
         }
 
         get("/meets") {
-            val userId = call.request.queryParameters["id"]?: return@get call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@get call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
@@ -46,23 +41,22 @@ fun Route.requestRoutes() {
         }
 
         get("/active") {
-            val userId = call.request.queryParameters["id"]?: return@get call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@get call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
 
             val type = call.request.queryParameters["type"];
 
-            val request = repository.getActiveRequest(userId.toInt(), type)?: return@get call.respondText(
-                "Missing Requests",
-                status = HttpStatusCode.NotFound
+            val request = repository.getActiveRequest(userId.toInt(), type)?: return@get call.respond(
+                HttpStatusCode.OK
             )
 
             call.respond(request)
         }
 
         post {
-            val userId = call.request.queryParameters["id"]?: return@post call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@post call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
@@ -98,6 +92,7 @@ fun Route.requestRoutes() {
         }
 
         put("/{id}/done") {
+
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
                 status = HttpStatusCode.BadRequest
@@ -140,7 +135,7 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
-            val userId = call.request.queryParameters["id"]?: return@put call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@put call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
@@ -183,7 +178,7 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
-            val userId = call.request.queryParameters["id"]?: return@put call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@put call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
@@ -226,7 +221,7 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
-            val userId = call.request.queryParameters["id"]?: return@put call.respondText(
+            val userId = call.request.queryParameters["user_id"]?: return@put call.respondText(
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )

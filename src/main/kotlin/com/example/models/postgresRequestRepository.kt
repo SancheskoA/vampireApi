@@ -22,7 +22,7 @@ class PostgresRequestRepository : RequestRepository {
          RequestDAO.all().map(::daoToModelRequest)
     }
 
-    override suspend fun allRequestFilter(filter: String?, userId: Int): List<Request> = suspendTransaction {
+    override suspend fun allRequestFilter(filter: String?, userId: Int?): List<Request> = suspendTransaction {
         val query = when (filter) {
             null -> {
                 // Запрос для случая, когда filter отсутствует
