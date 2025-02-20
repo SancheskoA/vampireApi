@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResponseRequestDto (
-    val order: Request
+    val order: Request? = null,
 )
 

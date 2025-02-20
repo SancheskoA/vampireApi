@@ -1,4 +1,5 @@
 package com.example.models
+import io.ktor.util.AttributeKey
 
 interface UserRepository {
     suspend fun allUsers(): List<User>
@@ -10,3 +11,4 @@ interface UserRepository {
     suspend fun removeUser(id: Int)
 }
 
+val UserRepositoryKey = AttributeKey<UserRepository>("UserRepository")

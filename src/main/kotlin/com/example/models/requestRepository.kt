@@ -1,4 +1,5 @@
 package com.example.models
+import io.ktor.util.AttributeKey
 
 interface RequestRepository {
     suspend fun allRequest(): List<Request>
@@ -9,3 +10,5 @@ interface RequestRepository {
     suspend fun updateRequest(id: Int, request: Request)
     suspend fun removeRequest(id: Int)
 }
+
+val RequestRepositoryKey = AttributeKey<RequestRepository>("RequestRepository")

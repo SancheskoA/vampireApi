@@ -1,7 +1,6 @@
 package com.example.plugins
 
 import com.example.routes.authRoutes
-import com.example.routes.productRouting
 import com.example.routes.requestRoutes
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -9,6 +8,8 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 
 
 fun Application.configureRouting() {
@@ -23,11 +24,14 @@ fun Application.configureRouting() {
 
 
     }
+    install(ContentNegotiation) {
+        json()
+    }
+
     routing {
         get("/") {
             call.respondText("Hello World!")
         }
-        productRouting()
         authRoutes()
         requestRoutes()
     }

@@ -1,8 +1,6 @@
 package com.example.routes
 import com.example.dto.ResponseRegistrationDto
 import kotlin.random.Random
-
-
 import com.example.models.*
 import com.example.plugins.generateJwtToken
 import io.ktor.http.*
@@ -12,26 +10,22 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.authRoutes() {
-    val repository = PostgresUserRepository()
 
     route("/api/auth") {
 
         post {
+            val repository = call.application.attributes[UserRepositoryKey]
+
             val obj: LoginDTO = call.receive<LoginDTO>();
 
-            val login = obj.login?: return@post call.respondText(
-                "Missing login",
-                status = HttpStatusCode.BadRequest
-            )
 
-            val password = obj.password?: return@post call.respondText(
-                "Missing password",
-                status = HttpStatusCode.BadRequest
-            )
+            val login = obj.login
+
+            val password = obj.password
 
             val user = repository.userByUserName(login)?: return@post call.respondText(
                 "Missing user",
-                status = HttpStatusCode.BadRequest
+                status = HttpStatusCode.NotFound
             )
 
             if (user.password != password) {
@@ -53,6 +47,7 @@ fun Route.authRoutes() {
         }
 
         post("/registration") {
+            val repository = call.application.attributes[UserRepositoryKey]
 
             val registrationDto: RegistrationDTO = call.receive<RegistrationDTO>()
 

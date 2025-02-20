@@ -9,6 +9,7 @@ plugins {
     kotlin("jvm") version "2.0.20"
     id("io.ktor.plugin") version "2.3.12"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
+    id("jacoco")
 }
 
 group = "com.example"
@@ -40,8 +41,38 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm")
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-    testImplementation("io.ktor:ktor-server-test-host-jvm")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("io.ktor:ktor-server-request-validation")
     implementation("com.auth0:java-jwt:4.4.0")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+
+    testImplementation("io.ktor:ktor-server-test-host:2.3.12")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+    testImplementation("io.mockk:mockk:1.13.4")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.20")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.0.20")
+
+    testImplementation("org.testcontainers:testcontainers:1.17.6")
+    testImplementation("org.testcontainers:postgresql:1.17.6")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
+}
+
+tasks.test {
+    useJUnitPlatform() // Используем JUnit 5
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // Зависимость от задачи тестирования
+
+    reports {
+        xml.required.set(true) // Включить XML отчет
+        html.required.set(true) // Включить HTML отчет
+    }
+
+}
+
+
+jacoco {
+    toolVersion = "0.8.12"
 }

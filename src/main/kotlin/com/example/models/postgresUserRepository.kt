@@ -46,6 +46,7 @@ class PostgresUserRepository : UserRepository {
             inviterUserId = user.inviterUserId
             invitationCode = user.invitationCode
             kpi = 0
+
         }.toUser()
     }
 

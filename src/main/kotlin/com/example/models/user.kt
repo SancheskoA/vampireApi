@@ -7,7 +7,7 @@ data class NewUser(
     val username: String,
     val password: String,
     val role: String,
-    val inviterUserId: Int,
+    val inviterUserId: Int?,
     val invitationCode: String,
     val kpi: Int
 )
