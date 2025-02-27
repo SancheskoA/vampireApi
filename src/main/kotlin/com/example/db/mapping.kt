@@ -7,6 +7,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 import com.example.models.User
 import com.example.models.Request
+import com.example.models.Notification
 
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Transaction
@@ -69,6 +70,7 @@ object RequestTable : IntIdTable("requests") {
     val type = varchar("type", 255).nullable()
     val status = varchar("status", 255).nullable()
     val mapPoint = varchar("map_point", 255).nullable()
+    val review = varchar("review", 255).nullable()
 }
 
 class RequestDAO(id: EntityID<Int>) : IntEntity(id) {
@@ -82,6 +84,7 @@ class RequestDAO(id: EntityID<Int>) : IntEntity(id) {
     var type by RequestTable.type
     var status by RequestTable.status
     var mapPoint by RequestTable.mapPoint
+    var review by RequestTable.review
 
     fun toRequest(): Request {
         return Request(
@@ -93,7 +96,8 @@ class RequestDAO(id: EntityID<Int>) : IntEntity(id) {
             executorUserId = executorUserId,
             type = type,
             status = status,
-            mapPoint = mapPoint
+            mapPoint = mapPoint,
+            review = review
         )
     }
 }
@@ -107,7 +111,43 @@ fun daoToModelRequest(dao: RequestDAO) = Request(
     dao.executorUserId,
     dao.type,
     dao.status,
-    dao.mapPoint
+    dao.mapPoint,
+    dao.review
+)
+
+
+object NotificationTable : IntIdTable("notifications") {
+    val title = varchar("title", 255)
+    val body = varchar("body", 255)
+    val isSend = bool("is_send")
+    val ownerId = integer("owner_id").nullable()
+}
+
+class NotificationDAO(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<NotificationDAO>(NotificationTable)
+
+    var title by NotificationTable.title
+    var body by NotificationTable.body
+    var isSend by NotificationTable.isSend
+    var ownerId by NotificationTable.ownerId
+
+    fun toNotification(): Notification {
+        return Notification(
+            id = id.value, // Предполагаем, что id есть в Entity
+            title = title,
+            body = body,
+            isSend = isSend,
+            ownerId = ownerId
+        )
+    }
+}
+
+fun daoToModelNotification(dao: NotificationDAO) = Notification(
+    dao.id.value,
+    dao.title,
+    dao.body,
+    dao.isSend,
+    dao.ownerId
 )
 
 suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =

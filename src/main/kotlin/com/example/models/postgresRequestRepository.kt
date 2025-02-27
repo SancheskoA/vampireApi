@@ -50,7 +50,7 @@ class PostgresRequestRepository : RequestRepository {
                 return@suspendTransaction emptyList()
             }
         }
-        query.map(::daoToModelRequest)
+        query.limit(1000).map(::daoToModelRequest)
     }
 
     override suspend fun requestById(id: Int): Request? = suspendTransaction {
@@ -64,8 +64,7 @@ class PostgresRequestRepository : RequestRepository {
     override suspend fun getActiveRequest(userId: Int, type: String?): Request? = suspendTransaction {
         RequestDAO
             .find {
-                ((RequestTable.creatorUserId eq userId and (RequestTable.status notInList listOf(STATUS.DONE.description, STATUS.CANCELED.description))) or
-                (RequestTable.executorUserId eq userId and (RequestTable.status neq STATUS.DONE.description))) and
+                (( (RequestTable.creatorUserId eq userId) or (RequestTable.executorUserId eq userId)) and (RequestTable.status notInList listOf(STATUS.DONE.description, STATUS.CANCELED.description)))  and
                 (type?.let { (RequestTable.type eq it) or (RequestTable.executorUserId.isNotNull()) } ?: Op.TRUE)
             }
             .limit(1)
@@ -93,6 +92,7 @@ class PostgresRequestRepository : RequestRepository {
             it.type = request.type
             it.status = request.status
             it.mapPoint = request.mapPoint
+            it.review = request.review
         }
 
     }

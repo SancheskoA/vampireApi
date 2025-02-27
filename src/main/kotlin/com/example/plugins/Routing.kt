@@ -2,6 +2,7 @@ package com.example.plugins
 
 import com.example.routes.authRoutes
 import com.example.routes.requestRoutes
+import com.example.routes.notificationRoutes
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -34,5 +35,6 @@ fun Application.configureRouting() {
         }
         authRoutes()
         requestRoutes()
+        notificationRoutes()
     }
 }

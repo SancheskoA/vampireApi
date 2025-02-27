@@ -18,7 +18,6 @@ fun Route.authRoutes() {
 
             val obj: LoginDTO = call.receive<LoginDTO>();
 
-
             val login = obj.login
 
             val password = obj.password
@@ -80,6 +79,67 @@ fun Route.authRoutes() {
 
             call.respond(response)
 
+        }
+
+        put("/password") {
+            val repository = call.application.attributes[UserRepositoryKey]
+
+            val obj = call.receive<passwordDTO>();
+
+            val userId = call.request.queryParameters["user_id"] ?: return@put call.respondText(
+                "Missing user id",
+                status = HttpStatusCode.NotFound
+            )
+
+            var user = repository.userById(userId.toInt()) ?: return@put call.respondText(
+                "No user",
+                status = HttpStatusCode.NotFound
+            )
+
+            if (user.password != obj.oldPassword) {
+                return@put call.respondText(
+                    "Error password",
+                    status = HttpStatusCode.BadRequest
+                )
+            }
+
+            user.password = obj.newPassword;
+            repository.updateUser(user.id, user)
+
+            val jwtSecret = "your-secret-key"
+            val token = generateJwtToken(user, jwtSecret)
+
+            val response = ResponseRegistrationDto(
+                token = token,
+                user = user
+            );
+
+            call.respond(response)
+
+        }
+
+        get ("/user/{id}") {
+            val repository = call.application.attributes[UserRepositoryKey]
+
+            val id = call.parameters["id"] ?: return@get call.respondText(
+                "Missing id",
+                status = HttpStatusCode.BadRequest
+            )
+
+            val user = repository.userById(id.toInt())?: return@get call.respondText(
+                "Missing user",
+                status = HttpStatusCode.NotFound
+            )
+
+            val jwtSecret = "your-secret-key"
+            val token = generateJwtToken(user, jwtSecret)
+
+            val response = ResponseRegistrationDto (
+                token = token,
+                user = user
+            );
+
+            call.respond(response)
         }
 
     }

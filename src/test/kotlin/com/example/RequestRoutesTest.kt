@@ -317,11 +317,29 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
+
+
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -394,12 +412,27 @@ class RequestRoutesTest {
             override suspend fun removeUser(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRequestRepository)
                 it.attributes.put(UserRepositoryKey, mockUserRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -442,11 +475,26 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -488,11 +536,26 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -540,11 +603,26 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -586,11 +664,26 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -633,9 +726,23 @@ class RequestRoutesTest {
             )
             override suspend fun updateRequest(id: Int, request: Request) {
                 assertEquals(STATUS.NEW.description, request.status)
-                assertEquals(2, request.executorUserId)
+                assertEquals(null, request.executorUserId)
             }
             override suspend fun removeRequest(id: Int) {}
+        }
+
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
         }
 
         application {
@@ -643,6 +750,7 @@ class RequestRoutesTest {
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -905,11 +1013,26 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -951,11 +1074,26 @@ class RequestRoutesTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         application {
             configureRouting()
             // Заменяем репозиторий на мок
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 

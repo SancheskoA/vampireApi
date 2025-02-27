@@ -83,6 +83,7 @@ fun Route.requestRoutes() {
 
         delete("/{id}/cancel") {
             val repository = call.application.attributes[RequestRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@delete call.respondText(
                 "Missing id",
@@ -94,7 +95,16 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
+            if (request.executorUserId != null) {
+                val notification = NewNotification(
+                    title = "Уведомление о заказе",
+                    body = "Заказ № " + request.id + " " + STATUS.CANCELED.description,
+                    ownerId = request.executorUserId
+                )
+                notificationRepository.addNotification(notification)
+            }
             request.status = STATUS.CANCELED.description
+            request.executorUserId = null
             repository.updateRequest(request.id, request)
 
             call.respond(request)
@@ -103,6 +113,7 @@ fun Route.requestRoutes() {
         put("/{id}/done") {
             val repository = call.application.attributes[RequestRepositoryKey]
             val userRepository = call.application.attributes[UserRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
@@ -127,6 +138,13 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
+            val notification = NewNotification(
+                title = "Уведомление о заказе",
+                body = "Заказ № " + request.id + " " + STATUS.DONE.description,
+                ownerId = request.executorUserId
+            )
+            notificationRepository.addNotification(notification)
+
             user.kpi += if (request.type === "people") 500 else 200
             userRepository.updateUser(user.id, user)
 
@@ -135,6 +153,7 @@ fun Route.requestRoutes() {
 
         put("/{id}/take") {
             val repository = call.application.attributes[RequestRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
@@ -150,6 +169,13 @@ fun Route.requestRoutes() {
                 "Missing user id",
                 status = HttpStatusCode.NotFound
             )
+
+            val notification = NewNotification(
+                title = "Уведомление о заказе",
+                body = "Заказ № " + request.id + " " + STATUS.SEARCH_FOR_RESIDENT.description,
+                ownerId = request.creatorUserId
+            )
+            notificationRepository.addNotification(notification)
 
             request.status = STATUS.SEARCH_FOR_RESIDENT.description
             request.executorUserId = userId.toInt()
@@ -160,6 +186,7 @@ fun Route.requestRoutes() {
 
         put("/{id}/find") {
             val repository = call.application.attributes[RequestRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
@@ -171,6 +198,13 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
+            val notification = NewNotification(
+                title = "Уведомление о заказе",
+                body = "Заказ № " + request.id + " " + STATUS.RESIDENT_FOUND.description,
+                ownerId = request.creatorUserId
+            )
+            notificationRepository.addNotification(notification)
+
             val obj: findRequestDTO = call.receive<findRequestDTO>()
 
             request.status = STATUS.RESIDENT_FOUND.description
@@ -180,8 +214,30 @@ fun Route.requestRoutes() {
             call.respond(request)
         }
 
+        put("/{id}/review") {
+            val repository = call.application.attributes[RequestRepositoryKey]
+
+            val id = call.parameters["id"] ?: return@put call.respondText(
+                "Missing id",
+                status = HttpStatusCode.BadRequest
+            )
+
+            val request = repository.requestById(id.toInt()) ?: return@put call.respondText(
+                "No request with id $id",
+                status = HttpStatusCode.NotFound
+            )
+
+            val obj: reviewRequestDTO = call.receive<reviewRequestDTO>()
+
+            request.review = obj.review
+            repository.updateRequest(request.id, request)
+
+            call.respond(request)
+        }
+
         put("/{id}/accept") {
             val repository = call.application.attributes[RequestRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
@@ -198,6 +254,13 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
+            val notification = NewNotification(
+                title = "Уведомление о заказе",
+                body = "Заказ № " + request.id + " " + STATUS.ACCEPTED.description,
+                ownerId = request.creatorUserId
+            )
+            notificationRepository.addNotification(notification)
+
             request.status = STATUS.ACCEPTED.description
             request.executorUserId = userId.toInt()
             repository.updateRequest(request.id, request)
@@ -207,6 +270,7 @@ fun Route.requestRoutes() {
 
         put("/{id}/courier") {
             val repository = call.application.attributes[RequestRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
@@ -217,6 +281,13 @@ fun Route.requestRoutes() {
                 "No request with id $id",
                 status = HttpStatusCode.NotFound
             )
+
+            val notification = NewNotification(
+                title = "Уведомление о заказе",
+                body = "Заказ № " + request.id + " " + STATUS.СOURIER.description,
+                ownerId = request.creatorUserId
+            )
+            notificationRepository.addNotification(notification)
 
             val obj: findRequestDTO = call.receive<findRequestDTO>()
 
@@ -229,6 +300,7 @@ fun Route.requestRoutes() {
 
         put("/{id}/refuse") {
             val repository = call.application.attributes[RequestRepositoryKey]
+            val notificationRepository = call.application.attributes[NotificationRepositoryKey]
 
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Missing id",
@@ -240,13 +312,15 @@ fun Route.requestRoutes() {
                 status = HttpStatusCode.NotFound
             )
 
-            val userId = call.request.queryParameters["user_id"] ?: return@put call.respondText(
-                "Missing user id",
-                status = HttpStatusCode.NotFound
+            val notification = NewNotification(
+                title = "Уведомление о заказе",
+                body = "Заказ № " + request.id + " " + STATUS.CANCELED.description,
+                ownerId = request.creatorUserId
             )
+            notificationRepository.addNotification(notification)
 
             request.status = STATUS.NEW.description
-            request.executorUserId = userId.toInt()
+            request.executorUserId = null
             repository.updateRequest(request.id, request)
 
             call.respond(request)

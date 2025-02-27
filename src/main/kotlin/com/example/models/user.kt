@@ -16,7 +16,7 @@ data class NewUser(
 data class User(
     val id: Int,
     val username: String,
-    val password: String,
+    var password: String,
     var role: String,
     val invitationCode: String,
     var kpi: Int,
@@ -28,3 +28,6 @@ data class LoginDTO(val login: String, val password: String)
 
 @Serializable
 data class RegistrationDTO(val login: String, val password: String, val code: String)
+
+@Serializable
+data class passwordDTO(val oldPassword: String, val newPassword: String)

@@ -22,9 +22,13 @@ data class Request(
     var executorUserId: Int?,
     val type: String? = null,
     var status: String? = null,
-    val mapPoint: String? = null
+    val mapPoint: String? = null,
+    var review: String? = null
 )
 
 
 @Serializable
 data class findRequestDTO(val people: String)
+
+@Serializable
+data class reviewRequestDTO(val review: String)

@@ -12,6 +12,10 @@ import kotlin.test.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.routing.*
+import com.example.models.UserRepositoryKey
+import com.example.models.RequestRepositoryKey
+import com.example.models.NotificationRepositoryKey
+
 
 class BusinessProcessTest {
 
@@ -171,6 +175,20 @@ class BusinessProcessTest {
             override suspend fun removeRequest(id: Int) {}
         }
 
+        val mockNotificationRepository = object : NotificationRepository {
+            override suspend fun allNotifications(): List<Notification> = emptyList()
+            override suspend fun notificationByOwnerId(ownerId: Int): List<Notification> = emptyList()
+            override suspend fun addNotification(notification: NewNotification): Notification = Notification(
+                id = 1,
+                title = "New Notification",
+                body = "New Notification",
+                isSend = true,
+                ownerId = 1
+            )
+            override suspend fun updateNotification(id: Int, notification: Notification) {}
+            override suspend fun removeNotification(id: Int) {}
+        }
+
         val mockUserRepository = object : UserRepository {
             override suspend fun allUsers(): List<User> = emptyList()
             override suspend fun userById(id: Int): User? = User(
@@ -205,6 +223,7 @@ class BusinessProcessTest {
             environment.monitor.subscribe(ApplicationStarted) {
                 it.attributes.put(RequestRepositoryKey, mockRequestRepository)
                 it.attributes.put(UserRepositoryKey, mockUserRepository)
+                it.attributes.put(NotificationRepositoryKey, mockNotificationRepository)
             }
         }
 
@@ -271,6 +290,122 @@ class BusinessProcessTest {
         val response = client.get("/api/requests/vampire")
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(response.bodyAsText().contains("Vampire Request"))
+    }
+
+    @Test
+    fun testRequestStatusChange() = testApplication {
+        // Настройка приложения и базы данных
+
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+
+        application {
+            environment.monitor.subscribe(ApplicationStarted) {
+                it.attributes.put(UserRepositoryKey, PostgresUserRepository())
+                it.attributes.put(RequestRepositoryKey, PostgresRequestRepository())
+                it.attributes.put(NotificationRepositoryKey, PostgresNotificationRepository())
+            }
+
+            configureDatabases()
+            configureRouting()
+        }
+
+        // Шаг 1: Создание нового заказа
+        val createRequestResponse = client.post("/api/requests?user_id=1") {
+            contentType(ContentType.Application.Json)
+            setBody("""
+                {
+                    "mapPoint": "123,456",
+                    "comment": "blood",
+                    "type": "blood"
+                }
+            """.trimIndent())
+        }
+        assertEquals(HttpStatusCode.OK, createRequestResponse.status)
+        val requestId = createRequestResponse.bodyAsText().substringAfter("\"id\":").substringBefore(",").toInt()
+
+        // Шаг 2: Взятие заказа в работу
+        val takeRequestResponse = client.put("/api/requests/$requestId/take?user_id=2")
+        assertEquals(HttpStatusCode.OK, takeRequestResponse.status)
+
+        // Шаг 3: Изменение статуса на "Курьер в пути"
+        val courierRequestResponse = client.put("/api/requests/$requestId/courier") {
+            contentType(ContentType.Application.Json)
+            setBody("""
+                {
+                    "people": "Courier Name"
+                }
+            """.trimIndent())
+        }
+        assertEquals(HttpStatusCode.OK, courierRequestResponse.status)
+
+        // Шаг 4: Завершение заказа
+        val doneRequestResponse = client.put("/api/requests/$requestId/done")
+        assertEquals(HttpStatusCode.OK, doneRequestResponse.status)
+
+        val finalStatus = doneRequestResponse.bodyAsText().substringAfter("\"status\":\"").substringBefore("\"")
+        assertEquals("Выполнен", finalStatus)
+    }
+
+    @Test
+    fun testCreateVampire() = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+
+        application {
+            environment.monitor.subscribe(ApplicationStarted) {
+                it.attributes.put(UserRepositoryKey, PostgresUserRepository())
+                it.attributes.put(RequestRepositoryKey, PostgresRequestRepository())
+                it.attributes.put(NotificationRepositoryKey, PostgresNotificationRepository())
+            }
+
+            configureDatabases()
+            configureRouting()
+        }
+
+        // Шаг 1: Создание нового заказа
+        val createRequestResponse = client.post("/api/requests?user_id=1") {
+            contentType(ContentType.Application.Json)
+            setBody("""
+                {
+                    "mapPoint": "123,456",
+                    "comment": "Test request",
+                    "type": "blood"
+                }
+            """.trimIndent())
+        }
+        assertEquals(HttpStatusCode.OK, createRequestResponse.status)
+        val requestId = createRequestResponse.bodyAsText().substringAfter("\"id\":").substringBefore(",").toInt()
+
+        // Шаг 2: Взятие заказа в работу
+        val takeRequestResponse = client.put("/api/requests/$requestId/take?user_id=2")
+        assertEquals(HttpStatusCode.OK, takeRequestResponse.status)
+
+        // Шаг 3: Изменение роли пользователя на "supremeVampire"
+        val createVampireResponse = client.put("/api/requests/$requestId/createVampire")
+        assertEquals(HttpStatusCode.OK, createVampireResponse.status)
+
+        // Шаг 4: Аутентификация пользователя для проверки роли
+        val authResponse = client.post("/api/auth") {
+            contentType(ContentType.Application.Json)
+            setBody("""
+                {
+                    "login": "test",
+                    "password": "test1"
+                }
+            """.trimIndent())
+        }
+        assertEquals(HttpStatusCode.OK, authResponse.status)
+
+        // Извлекаем роль пользователя из ответа
+        val userRole = authResponse.bodyAsText().substringAfter("\"role\":\"").substringBefore("\"")
+        assertEquals("supremeVampire", userRole)
     }
 
 }
